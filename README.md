@@ -1,2 +1,2 @@
 # My_Python
-一些python的题目
+一些python的训练题目
