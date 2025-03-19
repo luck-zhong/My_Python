@@ -36,6 +36,7 @@ class StudentManager:
         self.filename = filename
         self.students = self._load_student_info()
 
+    # 从文件读取学生信息
     def _load_student_info(self):
         try:
             with open(self.filename, 'r', encoding='UTF-8') as file:
@@ -47,6 +48,7 @@ class StudentManager:
         except json.JSONDecodeError as e:
             raise ValueError("无效的JSON格式")
 
+    # 保存学生信息到文件
     def save_student_info(self):
         try:
             with open(self.filename, 'w', encoding='UTF-8') as file:
@@ -66,13 +68,26 @@ class StudentManager:
             item.get('成绩', {})
         )
 
+    # 查找学生信息
     def find_student(self, student_id):
         for s in self.students:
             if s.student_id == student_id:
                 print(f"{'学号':<12} {'姓名':<10}{''.join(map(str, s.score.keys())):<8}")
                 print(f"{s.student_id:<12} {s.name:<10}{''.join(map(str, s.score.values())):<8}")
+                break
+        else:
+            print('查无此人!')
+
+    # 删除学生信息
+    def delete_student(self, student_id):
+        for s in self.students:
+            if s.student_id == student_id:
+                self.students.remove(s)
+                self.save_student_info()
 
 
 if __name__ == '__main__':
     Manage = StudentManager('student.json')
+    Manage.delete_student(2020)
     Manage.find_student(2020)
+
