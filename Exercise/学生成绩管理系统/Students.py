@@ -52,11 +52,13 @@ class StudentManager:
     def save_student_info(self):
         try:
             with open(self.filename, 'w', encoding='UTF-8') as file:
+                student_info = []
                 for s in self.students:
-                    json.dump([s.to_dict()],
-                              file,
-                              indent=2,
-                              ensure_ascii=False)
+                    student_info.append(s.to_dict())
+                json.dump(student_info,
+                          file,
+                          indent=2,
+                          ensure_ascii=False)
 
         except FileNotFoundError as e:
             raise FileNotFoundError(f"文件 {self.filename} 未找到")
@@ -85,9 +87,19 @@ class StudentManager:
                 self.students.remove(s)
                 self.save_student_info()
 
+    # 添加学生信息
+    def add_student(self, student_id, name):
+        for s in self.students:
+            if student_id == s.student_id:
+                print('此学生信息已存在!')
+                break
+        else:
+            new_student = Student(student_id, name)
+            self.students.append(new_student)
+            self.save_student_info()
+
 
 if __name__ == '__main__':
     Manage = StudentManager('student.json')
-    Manage.delete_student(2020)
     Manage.find_student(2020)
-
+    Manage.add_student(2022, '王五')
