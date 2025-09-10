@@ -1,0 +1,13 @@
+{
+  "students": [
+    {
+      "name": "zhangsan",
+      "student_id": 20,
+      "score": {
+        "Chinese": 88,
+        "Math": 98,
+        "English": 92
+      }
+    }
+  ]
+}
