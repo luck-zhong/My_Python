@@ -1,0 +1,38 @@
+{
+  "students": {
+    "2023001": {
+      "student_id": "2023001",
+      "name": "张三",
+      "major": "计算机科学",
+      "grades": [
+        {
+          "course_name": "高等数学",
+          "score": 85.5,
+          "credit": 4.0
+        },
+        {
+          "course_name": "程序设计",
+          "score": 92.0,
+          "credit": 3.0
+        }
+      ]
+    },
+    "2023002": {
+      "student_id": "2023002",
+      "name": "李四",
+      "major": "软件工程",
+      "grades": [
+        {
+          "course_name": "高等数学",
+          "score": 78.0,
+          "credit": 4.0
+        },
+        {
+          "course_name": "英语",
+          "score": 88.5,
+          "credit": 2.0
+        }
+      ]
+    }
+  }
+}
