@@ -9,6 +9,8 @@
 """
 from serial_pkg.serial_port import SerialPort
 from serial.tools import list_ports
+from utils.config import Config
+
 
 class SerialController:
     def __init__(self, ui):
@@ -17,6 +19,7 @@ class SerialController:
         """
         self.ui = ui
         self.serial = None
+        self.config = Config()
 
         # 控制选项
         self.hex_mode = False
@@ -36,6 +39,11 @@ class SerialController:
             )
             self.serial.set_rx_callback(self.on_serial_data)
             self.serial.open()
+            self.config.set('port', port)
+            self.config.set('baudrate', baud)
+            self.config.set('parity', parity)
+            self.config.set('stopbits', stopbits)
+            self.config.set('bytesize', bytesize)
 
             self.ui.show_status(f"串口已打开：{port}")
         except Exception as e:
@@ -46,6 +54,24 @@ class SerialController:
             self.serial.close()
             self.serial = None
             self.ui.show_status("串口已关闭")
+
+    def get_serial_ports(self):
+        return [p.device for p in list_ports.comports()]
+
+    def get_last_config(self):
+        """
+        返回一个包含上次使用的串口配置的 dict。
+        提供合理的默认值，避免缺键报错。
+        """
+        return {
+            "port": self.config.get("port", ""),  # 上次的串口名或空
+            "baud": self.config.get("baud", 115200),  # 上次波特率
+            "parity": self.config.get("parity", "N"),  # 校验位
+            "stopbits": self.config.get("stopbits", 1),  # 停止位
+            "bytesize": self.config.get("bytesize", 8),  # 数据位
+            "hex_mode": self.config.get("hex_mode", False),
+            "timestamp": self.config.get("timestamp", False),
+        }
 
     # ----------------------
     # 发送数据
@@ -105,9 +131,8 @@ class SerialController:
     # ----------------------
     def set_hex_mode(self, enabled: bool):
         self.hex_mode = enabled
+        self.config.set('hex_mode', enabled)
 
     def set_timestamp_mode(self, enabled: bool):
         self.timestamp = enabled
-
-    def get_serial_ports(self):
-        return [p.device for p in list_ports.comports()]
+        self.config.set('timestamp', enabled)

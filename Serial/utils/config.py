@@ -12,7 +12,8 @@
 import json
 import os
 
-class Config:
+
+class Config(object):
     def __init__(self, file="config.json"):
         self.file = file
         self.data = {}

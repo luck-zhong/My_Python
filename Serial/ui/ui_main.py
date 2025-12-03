@@ -30,30 +30,73 @@ class SerialUI:
         top_frame = tk.Frame(self.root)
         top_frame.pack(fill="x", pady=5)
 
-        tk.Label(top_frame, text="串口号:").pack(side="left")
+        # 左侧：端口选择、开关按钮
+        left_frame = tk.Frame(top_frame)
+        left_frame.pack(side="left", fill="x", expand=True)
+        tk.Label(left_frame, text="串口号:").pack(side="left")
         self.port_var = tk.StringVar()
-        self.port_combo = ttk.Combobox(top_frame, textvariable=self.port_var, width=10)
+        self.port_combo = ttk.Combobox(left_frame, textvariable=self.port_var, width=10)
         self.port_combo['values'] = self.controller.get_serial_ports()
         self.port_combo.pack(side="left", padx=5)
+        self.open_btn = tk.Button(left_frame, text="打开串口", command=self.on_open_clicked)
+        self.open_btn.pack(side="left", padx=5)
+        self.open_btn = tk.Button(left_frame, text="关闭串口", command=self.on_close_clicked)
+        self.open_btn.pack(side="left", padx=5)
 
-        tk.Label(top_frame, text="波特率:").pack(side="left")
-        self.baud_var = tk.StringVar(value="115200")
-        self.baud_combo = ttk.Combobox(top_frame, textvariable=self.baud_var, width=10)
+
+        last = self.controller.get_last_config()
+
+        # 右侧：连接参数竖排
+        params_frame = tk.LabelFrame(top_frame, text="连接参数")
+        params_frame.pack(side="right", fill="y", padx=5)
+
+        # 波特率
+        baud_row = tk.Frame(params_frame)
+        baud_row.pack(fill="x", pady=2)
+        tk.Label(baud_row, text="波特率").pack(side="left")
+        self.baud_var = tk.StringVar(value=self.controller.get_last_config().get("baud", 115200))
+        self.baud_combo = ttk.Combobox(baud_row, textvariable=self.baud_var, width=10)
         self.baud_combo['values'] = ["9600", "19200", "38400", "57600", "115200", "230400"]
         self.baud_combo.pack(side="left", padx=5)
 
-        self.open_btn = tk.Button(top_frame, text="打开串口", command=self.on_open_clicked)
-        self.open_btn.pack(side="left", padx=5)
+        # 校验位
+        parity_row = tk.Frame(params_frame)
+        parity_row.pack(fill="x", pady=2)
+        tk.Label(parity_row, text="校验位").pack(side="left")
+        self.parity_var = tk.StringVar(value=self.controller.get_last_config().get("parity", "N"))
+        self.parity_combo = ttk.Combobox(parity_row, textvariable=self.parity_var, width=5)
+        self.parity_combo['values'] = ["N", "E", "O"]
+        self.parity_combo.pack(side="left", padx=5)
+
+        # 停止位
+        stop_row = tk.Frame(params_frame)
+        stop_row.pack(fill="x", pady=2)
+        tk.Label(stop_row, text="停止位").pack(side="left")
+        self.stop_var = tk.StringVar(value=str(self.controller.get_last_config().get("stopbits", 1)))
+        self.stop_combo = ttk.Combobox(stop_row, textvariable=self.stop_var, width=5)
+        self.stop_combo['values'] = ["1", "1.5", "2"]
+        self.stop_combo.pack(side="left", padx=5)
+
+        # 数据位
+        data_row = tk.Frame(params_frame)
+        data_row.pack(fill="x", pady=2)
+        tk.Label(data_row, text="数据位").pack(side="left")
+        self.bytesize_var = tk.StringVar(value=str(self.controller.get_last_config().get("bytesize", 8)))
+        self.bytesize_combo = ttk.Combobox(data_row, textvariable=self.bytesize_var, width=5)
+        self.bytesize_combo['values'] = ["5", "6", "7", "8"]
+        self.bytesize_combo.pack(side="left", padx=5)
+
+
 
         # --- 设置区域 ---
         set_frame = tk.Frame(self.root)
         set_frame.pack(fill="x")
 
-        self.hex_var = tk.BooleanVar()
+        self.hex_var = tk.BooleanVar(value=last.get("hex_mode", False))
         tk.Checkbutton(set_frame, text="HEX", variable=self.hex_var,
                        command=self.on_hex_changed).pack(side="left")
 
-        self.timestamp_var = tk.BooleanVar()
+        self.timestamp_var = tk.BooleanVar(value=last.get("timestamp", False))
         tk.Checkbutton(set_frame, text="时间戳", variable=self.timestamp_var,
                        command=self.on_timestamp_changed).pack(side="left")
 
@@ -88,10 +131,15 @@ class SerialUI:
         baud = int(self.baud_var.get())
         self.controller.open_port(port, baud)
 
+    def on_close_clicked(self):
+        self.controller.close_port()
+
     def on_hex_changed(self):
+        self.controller.config.set('hex_mode', self.hex_var.get())
         self.controller.set_hex_mode(self.hex_var.get())
 
     def on_timestamp_changed(self):
+        self.controller.config.set('timestamp', self.timestamp_var.get())
         self.controller.set_timestamp_mode(self.timestamp_var.get())
 
     def on_send_clicked(self):
